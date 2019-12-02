@@ -6,11 +6,21 @@ Esse projeto foi desenvolvido com C#, .Net Core 3.0.1 e persistência de dados e
 ## Requisitos
 
 1. .Net SDK - Disponível em: https://dotnet.microsoft.com/download
-2. EntityFrameworkInMemory - na pasta do projeto execute:
+
+## Go!
+
+Depois de instalar o sdk pra rodar a api entre na pasta do projeto principal ("..\challengeStone\api") e execute:
 
 ```sh
-dotnet add package Microsoft.EntityFrameworkCore.InMemory
+dotnet build & dotnet run
 ```
+
+Para rodar os testes vá para "..\challengeStone\api-test" e execute:
+
+```sh
+dotnet build & dotnet test
+```
+
 
 ## Exemplo de uso
 
