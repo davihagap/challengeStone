@@ -5,15 +5,6 @@ namespace api.Models
 {
     public class Transacao
     {
-        public Transacao(string descricao, string tipo, DateTime data, decimal valor, int contaId)
-        {
-            Descricao = descricao;
-            Tipo = tipo;
-            Data = data;
-            Valor = valor;
-            ContaId = contaId;
-        }
-
         [Key]
         public int Id {get; set;}
 
@@ -26,7 +17,7 @@ namespace api.Models
         [Range(0,int.MaxValue, ErrorMessage = "Valor deve ser positivo")]
         public decimal Valor {get; set;}
 
-        public int ContaId{get; set;}
+        public int ContaNum{get; set;}
 
         public Conta Conta{get; set;}
     }

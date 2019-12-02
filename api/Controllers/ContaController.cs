@@ -10,7 +10,7 @@ using api.Models;
 namespace api.Controllers
 {
     [ApiController]
-    [Route("contas/")]
+    [Route("api/contas/")]
     public class ContaController:ControllerBase
     {
         //get para obtenção de lista de todas as contas do banco
@@ -45,7 +45,7 @@ namespace api.Controllers
         public async Task<ActionResult<List<Transacao>>> GetExtratos([FromServices] DataContext context, int num)
         {
             var extratos = await context.Transacoes
-                .Where(t => t.ContaId == num)
+                .Where(t => t.ContaNum == num)
                 .AsNoTracking()
                 .ToListAsync();
             if (extratos != null)
@@ -59,14 +59,20 @@ namespace api.Controllers
         //localhost:5000/contas
         [HttpPost]
         [Route("")]
-        public async Task<ActionResult<Conta>> Post(
+        public async Task<ActionResult<Conta>> PostCriaConta(
             [FromServices] DataContext context,
             [FromBody] Conta model
         )
         {
             if (ModelState.IsValid)
             {
-                context.Contas.Add(model);
+                try
+                {
+                    context.Contas.Add(model);
+                }catch(Exception e)
+                {
+                    return BadRequest("Dados imcompatíveis");
+                }
                 await context.SaveChangesAsync();
                 return model;
             }else{
@@ -89,23 +95,35 @@ namespace api.Controllers
                 var conta = await context.Contas
                     .FirstOrDefaultAsync( c => c.Numero == num);
                 if (conta != null){
-                    var deposito = new Transacao(
-                        model.Descricao,
-                        "DEP",
-                        DateTime.Now,
-                        model.Valor,
-                        conta.Numero
-                    );
-                    context.Transacoes.Add(deposito);
+                    var deposito = new Transacao{
+                        Descricao = model.Descricao,
+                        Tipo = "DEP",
+                        Data = DateTime.Now,
+                        Valor = model.Valor,
+                        ContaNum = conta.Numero
+                    };
+                    try
+                    {
+                        context.Transacoes.Add(deposito);
+                    }catch(Exception e)
+                    {
+                        return BadRequest("Dados imcompatíveis, transação não realizada");
+                    }
 
-                    var taxa = new Transacao(
-                        "Taxa sobre depósito #" +  deposito.Id,
-                        "TAXA",
-                        DateTime.Now,
-                        model.Valor * new decimal(0.01),
-                        conta.Numero
-                    );
-                    context.Transacoes.Add(taxa);
+                    var taxa = new Transacao{
+                        Descricao = "Taxa sobre depósito #" +  deposito.Id,
+                        Tipo = "TAXA",
+                        Data = DateTime.Now,
+                        Valor = model.Valor * new decimal(0.01),
+                        ContaNum = conta.Numero
+                    };
+                    try
+                    {
+                        context.Transacoes.Add(taxa);
+                    }catch(Exception e)
+                    {
+                        return BadRequest("Dados imcompatíveis, transação não realizada");
+                    }                    
 
                     conta.Saldo += deposito.Valor - taxa.Valor;
                     await context.SaveChangesAsync();
@@ -136,23 +154,35 @@ namespace api.Controllers
                     if (model.Valor>conta.Saldo-4){
                         return BadRequest("Saldo insuficiente");
                     }
-                    var saque = new Transacao(
-                        model.Descricao,
-                        "SAQ",
-                        DateTime.Now,
-                        model.Valor,
-                        conta.Numero
-                    );
-                    context.Transacoes.Add(saque);
+                    var saque = new Transacao{
+                        Descricao = model.Descricao,
+                        Tipo = "SAQ",
+                        Data = DateTime.Now,
+                        Valor = model.Valor,
+                        ContaNum = conta.Numero
+                    };
+                    try
+                    {
+                        context.Transacoes.Add(saque);
+                    }catch(Exception e)
+                    {
+                        return BadRequest("Dados imcompatíveis, transação não realizada");
+                    }
 
-                    var taxa = new Transacao(
-                        "Taxa sobre saque #" +  saque.Id,
-                        "TAXA",
-                        DateTime.Now,
-                        new decimal(4),
-                        conta.Numero
-                    );
-                    context.Transacoes.Add(taxa);
+                    var taxa = new Transacao{
+                        Descricao = "Taxa sobre saque #" +  saque.Id,
+                        Tipo = "TAXA",
+                        Data = DateTime.Now,
+                        Valor = new decimal(4),
+                        ContaNum = conta.Numero
+                    };
+                    try
+                    {
+                        context.Transacoes.Add(taxa);
+                    }catch(Exception e)
+                    {
+                        return BadRequest("Dados imcompatíveis, transação não realizada");
+                    }
 
                     conta.Saldo -= saque.Valor + taxa.Valor;
                     await context.SaveChangesAsync();
