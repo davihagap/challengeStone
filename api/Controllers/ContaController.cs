@@ -17,41 +17,27 @@ namespace api.Controllers
         //localhost:5000/contas
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<List<Conta>>> Get([FromServices] DataContext context)
+        public async Task<ActionResult<List<Conta>>> Get([FromServices] ContaService service)
         {
-            var contas = await context.Contas.ToListAsync();
-            return contas;
+            return await service.ListAsync();
         }
 
         //get para obtenção de uma conta especifica por número da conta
         //localhost:5000/contas/1
         [HttpGet]
         [Route("{num:int}")]
-        public async Task<ActionResult<Conta>> GetByNum([FromServices] DataContext context, int num)
+        public async Task<ActionResult<Conta>> GetByNum([FromServices] ContaService service, int num)
         {
-            var conta = await context.Contas
-                .AsNoTracking()
-                .FirstOrDefaultAsync( c => c.Numero == num);
-            if (conta != null)
-                return conta;
-            else
-                return NotFound("Conta inexistente");
+            return await service.FindByNumAsync(num);
         }
 
         //get para obtenção do extrato da conta
         //localhost:5000/contas/1/extratos
         [HttpGet]
         [Route("{num:int}/extratos")]
-        public async Task<ActionResult<List<Transacao>>> GetExtratos([FromServices] DataContext context, int num)
+        public async Task<ActionResult<IEnumerable<Transacao>>> GetExtratos([FromServices] ContaService service, int num)
         {
-            var extratos = await context.Transacoes
-                .Where(t => t.ContaNum == num)
-                .AsNoTracking()
-                .ToListAsync();
-            if (extratos != null)
-                return extratos;
-            else
-                return NotFound("Conta inexistente");
+            return await service.ListTransacoesAsync(num);
         }
 
 
@@ -60,21 +46,14 @@ namespace api.Controllers
         [HttpPost]
         [Route("")]
         public async Task<ActionResult<Conta>> PostCriaConta(
-            [FromServices] DataContext context,
+            [FromServices] ContaService service,
             [FromBody] Conta model
         )
         {
             if (ModelState.IsValid)
-            {
-                try
-                {
-                    context.Contas.Add(model);
-                }catch(Exception e)
-                {
-                    return BadRequest("Dados imcompatíveis");
-                }
-                await context.SaveChangesAsync();
-                return model;
+            {                
+                await service.SaveAsync(model);
+                return Ok(model);
             }else{
                 return BadRequest(ModelState);
             }
@@ -85,52 +64,14 @@ namespace api.Controllers
         [HttpPost]
         [Route("{num:int}/depositos")]
         public async Task<ActionResult<TransacaoViewModel>> PostDeposito(
-            [FromServices] DataContext context,
-            [FromBody] TransacaoViewModel model,
+            [FromServices] ContaService service,
+            [FromBody] TransacaoRequest model,
             int num
         )
         {
             if (ModelState.IsValid)
             {
-                var conta = await context.Contas
-                    .FirstOrDefaultAsync( c => c.Numero == num);
-                if (conta != null){
-                    var deposito = new Transacao{
-                        Descricao = model.Descricao,
-                        Tipo = "DEP",
-                        Data = DateTime.Now,
-                        Valor = model.Valor,
-                        ContaNum = conta.Numero
-                    };
-                    try
-                    {
-                        context.Transacoes.Add(deposito);
-                    }catch(Exception e)
-                    {
-                        return BadRequest("Dados imcompatíveis, transação não realizada");
-                    }
-
-                    var taxa = new Transacao{
-                        Descricao = "Taxa sobre depósito #" +  deposito.Id,
-                        Tipo = "TAXA",
-                        Data = DateTime.Now,
-                        Valor = model.Valor * new decimal(0.01),
-                        ContaNum = conta.Numero
-                    };
-                    try
-                    {
-                        context.Transacoes.Add(taxa);
-                    }catch(Exception e)
-                    {
-                        return BadRequest("Dados imcompatíveis, transação não realizada");
-                    }                    
-
-                    conta.Saldo += deposito.Valor - taxa.Valor;
-                    await context.SaveChangesAsync();
-                    return model;
-                }
-                else
-                    return NotFound("Conta inexistente, depósito não efetuado.");
+                return await service.DepositarAsync(model);
             }else{
                 return BadRequest(ModelState);
             }
@@ -141,55 +82,14 @@ namespace api.Controllers
         [HttpPost]
         [Route("{num:int}/saques")]
         public async Task<ActionResult<TransacaoViewModel>> PostSaque(
-            [FromServices] DataContext context,
-            [FromBody] TransacaoViewModel model,
+            [FromServices] ContaService service,
+            [FromBody] TransacaoRequest model,
             int num
         )
         {
             if (ModelState.IsValid)
             {
-                var conta = await context.Contas
-                    .FirstOrDefaultAsync( c => c.Numero == num);
-                if (conta != null){
-                    if (model.Valor>conta.Saldo-4){
-                        return BadRequest("Saldo insuficiente");
-                    }
-                    var saque = new Transacao{
-                        Descricao = model.Descricao,
-                        Tipo = "SAQ",
-                        Data = DateTime.Now,
-                        Valor = model.Valor,
-                        ContaNum = conta.Numero
-                    };
-                    try
-                    {
-                        context.Transacoes.Add(saque);
-                    }catch(Exception e)
-                    {
-                        return BadRequest("Dados imcompatíveis, transação não realizada");
-                    }
-
-                    var taxa = new Transacao{
-                        Descricao = "Taxa sobre saque #" +  saque.Id,
-                        Tipo = "TAXA",
-                        Data = DateTime.Now,
-                        Valor = new decimal(4),
-                        ContaNum = conta.Numero
-                    };
-                    try
-                    {
-                        context.Transacoes.Add(taxa);
-                    }catch(Exception e)
-                    {
-                        return BadRequest("Dados imcompatíveis, transação não realizada");
-                    }
-
-                    conta.Saldo -= saque.Valor + taxa.Valor;
-                    await context.SaveChangesAsync();
-                    return model;
-                }
-                else
-                    return NotFound("Conta inexistente, saque não efetuado.");
+                return await service.SacarAsync(model);
             }else{
                 return BadRequest(ModelState);
             }

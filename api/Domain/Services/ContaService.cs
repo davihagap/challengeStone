@@ -25,14 +25,20 @@ namespace api.Domain.Services
             return conta;
         }
 
+        public async Task<IEnumerable<Transacao>> ListTransacoesAsync(int Num)
+        {
+            var conta = await _repository.FindByNumAsync(Num);
+            return await _repository.ListTransacoesAsync(conta);
+        }
+
         public async Task SaveAsync(IConta conta)
         {
             await _repository.SaveAsync(conta);
         }
 
-        public async Task<IDeposito> DepositarAsync(int Num, decimal valor)
+        public async Task<IDeposito> DepositarAsync(TransacaoRequest trans)
         {
-            var conta = await FindByNumAsync(Num);
+            var conta = await FindByNumAsync(trans.NumConta);
             var saldoAnterior = conta.Saldo;
 
             conta.Creditar(valor);
@@ -41,7 +47,7 @@ namespace api.Domain.Services
                 DateTime.Now, 
                 saldoAnterior, 
                 conta.Saldo,
-                valor);
+                trans.Valor);
             transacao.calculaTaxa();
 
             await this._repository.SaveAsync(transacao);
@@ -49,9 +55,9 @@ namespace api.Domain.Services
             return transacao;
         }
 
-        public async Task<ISaque> SacarAsync(int Num, decimal valor)
+        public async Task<ISaque> SacarAsync(TransacaoRequest trans)
         {
-            var conta = await FindByNumAsync(Num);
+            var conta = await FindByNumAsync(trans.NumConta);
             var saldoAnterior = conta.Saldo;
 
             conta.Debitar(valor);
@@ -60,7 +66,7 @@ namespace api.Domain.Services
                 DateTime.Now, 
                 saldoAnterior, 
                 conta.Saldo,
-                valor);
+                trans.Valor);
             transacao.calculaTaxa();
 
             await this._repository.SaveAsync(transacao);

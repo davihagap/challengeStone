@@ -18,12 +18,22 @@ namespace api.Domain.Repositories
 
         public async Task<IEnumerable<Conta>> ListAsync()
         {
-            return await this.context.Contas.ToListAsync();
+            return await this.context.Contas
+                .AsNoTracking()
+                .ToListAsync();
         }
 
-        public async Task<IConta> FindByNumAsync(int num)
+        public async Task<IConta> FindByNumAsync(int Num)
         {
-            return await this.context.Contas.FindAsync(num);
+            return await this.context.Contas.FindAsync(Num);
+        }
+
+        public async Task<IEnumerable<Transacao>> ListTransacoesAsync(IConta conta)
+        {
+            return await this.context.Transacoes
+                .Where(t => t.Conta.Numero == conta.Numero)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task SaveAsync(IConta conta)
@@ -31,6 +41,7 @@ namespace api.Domain.Repositories
             this.context.Contas.Add((Conta) conta);
             await this.context.SaveChangesAsync();
         }
+
 
         public bool ContaExiste(IConta conta)
         {

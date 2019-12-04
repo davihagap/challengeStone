@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using api.Data;
+using api.Domain.Services;
 
 namespace chellengeStone
 {
@@ -28,7 +28,8 @@ namespace chellengeStone
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>(opt => opt.UseInMemoryDatabase("banco"));
-            services.AddScoped<DataContext, DataContext>();
+            services.AddScoped<IContaRepository, ContaRepository>();
+            services.AddScoped<IContaService, ContaService>();
             services.AddControllers();
         }
 
