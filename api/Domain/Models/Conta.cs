@@ -16,6 +16,15 @@ namespace api.Domain.Models
         [Range(0.01,9999999999.9, ErrorMessage = "Saldo deve ser positivo")]
         public decimal Saldo {get; set; }
 
+        public Conta (){}
+        
+        public Conta(int numero, string cliente, decimal saldo)
+        {
+            this.Numero = numero;
+            this.Cliente = cliente;
+            this.Saldo = saldo;
+        }
+
         public void Creditar(decimal valor)
         {
             if (valor < 0.01m)
