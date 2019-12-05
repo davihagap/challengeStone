@@ -28,11 +28,10 @@ namespace api.Domain.Repositories
             return await this.context.Contas.FindAsync(Num);
         }
 
-        public async Task<IEnumerable<Transacao>> ListTransacoesAsync(IConta conta)
+        public async Task<IEnumerable<Transacao>> ListTransacoesAsync(int NumConta)
         {
             return await this.context.Transacoes
-                .Where(t => t.Conta.Numero == conta.Numero)
-                .AsNoTracking()
+                .Where(t => t.NumeroConta == NumConta)
                 .ToListAsync();
         }
 
@@ -42,10 +41,10 @@ namespace api.Domain.Repositories
             await this.context.SaveChangesAsync();
         }
 
-
-        public bool ContaExiste(IConta conta)
+        public async Task SaveTransacaoAsync(ITransacao trans)
         {
-            return this.context.Contas.Any(c => c.Numero == conta.Numero);
+            this.context.Transacoes.Add((Transacao) trans);
+            await this.context.SaveChangesAsync();
         }
     }
 }

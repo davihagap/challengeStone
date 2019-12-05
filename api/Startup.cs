@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using api.Domain.Services;
+using api.Domain.Repositories;
+using api.Data;
 
 namespace chellengeStone
 {

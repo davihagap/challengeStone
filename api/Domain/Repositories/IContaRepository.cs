@@ -8,7 +8,8 @@ namespace api.Domain.Repositories
     {
         Task<IEnumerable<Conta>> ListAsync();
         Task<IConta> FindByNumAsync(int num);
-        Task AddAsync(IConta conta);
-        bool ContaExiste(IConta conta);
+        Task<IEnumerable<Transacao>> ListTransacoesAsync(int NumConta);        
+        Task SaveAsync(IConta conta);
+        Task SaveTransacaoAsync(ITransacao trans);
     }
 }

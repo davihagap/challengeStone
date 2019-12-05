@@ -10,6 +10,5 @@ namespace api.Domain.Models
 
         void Creditar(decimal valor);
         void Debitar(decimal valor);
-        void Transferir(decimal valor, IConta contaDestino);
     }
 }

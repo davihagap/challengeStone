@@ -1,22 +1,24 @@
+using System;
+
 namespace api.Domain.Models
 {
-    public class Transacao
+    public interface ITransacao
     {
-        public int Id {get; set;}
+        public int Id {get;}
 
-        public string Descricao {get; set;}
+        public string Descricao {get;}
 
-        public string Tipo {get; set;}
+        public string Tipo {get;}
 
-        public DateTime Data {get; set;}
+        public DateTime Data {get;}
         
-        public decimal SaldoAnterior {get; set;}
+        public decimal SaldoAnterior {get;}
 
-        public decimal SaldoPosterior {get; set;}
+        public decimal SaldoPosterior {get;}
 
-        public decimal Valor {get; set;}
+        public decimal Valor {get;}
 
-        public IConta Conta{get; set;}
+        public IConta Conta{get;}
         
     }
 }

@@ -10,12 +10,14 @@ namespace api.Domain.Models
         private const string descSaq = "Saque";
         private const string tipoSaq = "SAQ";
 
-        public Deposito(IConta conta,
+        public Saque(
+            IConta conta,
             DateTime data,
             decimal saldoAnterior,
             decimal saldoPosterior,
             decimal valor
-        ) : base (conta,
+        ) : base (
+            conta,
             descSaq,
             tipoSaq,
             data,
@@ -25,12 +27,13 @@ namespace api.Domain.Models
         )
         {}
 
-        public ITransacao Taxa { get; private set; }
+        public ITransacao Taxa { get; set; }
 
         public ITransacao calculaTaxa()
         {
             this.Conta.Debitar(taxaSaq);
-            this.Taxa = new Transacao(this.Conta, 
+            this.Taxa = new Transacao(
+                this.Conta, 
                 descTaxaSaq, 
                 tipoTaxaSaq, 
                 this.Data, 

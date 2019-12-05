@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using api.Data;
-using api.Models;
+using api.Domain.Models;
+using api.Domain.Services;
+using api.Domain.DTOs;
 
 namespace api.Controllers
 {
@@ -17,27 +19,30 @@ namespace api.Controllers
         //localhost:5000/contas
         [HttpGet]
         [Route("")]
-        public async Task<ActionResult<List<Conta>>> Get([FromServices] ContaService service)
+        public async Task<ActionResult<List<Conta>>> Get([FromServices] IContaService service)
         {
-            return await service.ListAsync();
+            var result = await service.ListAsync();
+            return Ok(result);
         }
 
         //get para obtenção de uma conta especifica por número da conta
         //localhost:5000/contas/1
         [HttpGet]
         [Route("{num:int}")]
-        public async Task<ActionResult<Conta>> GetByNum([FromServices] ContaService service, int num)
+        public async Task<ActionResult<Conta>> GetByNum([FromServices] IContaService service, int num)
         {
-            return await service.FindByNumAsync(num);
+            var result = await service.FindByNumAsync(num);
+            return Ok(result);
         }
 
         //get para obtenção do extrato da conta
         //localhost:5000/contas/1/extratos
         [HttpGet]
         [Route("{num:int}/extratos")]
-        public async Task<ActionResult<IEnumerable<Transacao>>> GetExtratos([FromServices] ContaService service, int num)
+        public async Task<ActionResult<IEnumerable<Transacao>>> GetExtratos([FromServices] IContaService service, int num)
         {
-            return await service.ListTransacoesAsync(num);
+            var result =  await service.ListTransacoesAsync(num);
+            return Ok(result);
         }
 
 
@@ -46,7 +51,7 @@ namespace api.Controllers
         [HttpPost]
         [Route("")]
         public async Task<ActionResult<Conta>> PostCriaConta(
-            [FromServices] ContaService service,
+            [FromServices] IContaService service,
             [FromBody] Conta model
         )
         {
@@ -63,15 +68,16 @@ namespace api.Controllers
         //localhost:5000/contas/3356/depositos/
         [HttpPost]
         [Route("{num:int}/depositos")]
-        public async Task<ActionResult<TransacaoViewModel>> PostDeposito(
-            [FromServices] ContaService service,
+        public async Task<ActionResult<TransacaoRequest>> PostDeposito(
+            [FromServices] IContaService service,
             [FromBody] TransacaoRequest model,
             int num
         )
         {
             if (ModelState.IsValid)
             {
-                return await service.DepositarAsync(model);
+                await service.DepositarAsync(model);
+                return Ok(model);
             }else{
                 return BadRequest(ModelState);
             }
@@ -81,15 +87,16 @@ namespace api.Controllers
         //localhost:5000/contas/3356/saques/
         [HttpPost]
         [Route("{num:int}/saques")]
-        public async Task<ActionResult<TransacaoViewModel>> PostSaque(
-            [FromServices] ContaService service,
+        public async Task<ActionResult<TransacaoRequest>> PostSaque(
+            [FromServices] IContaService service,
             [FromBody] TransacaoRequest model,
             int num
         )
         {
             if (ModelState.IsValid)
             {
-                return await service.SacarAsync(model);
+                await service.SacarAsync(model);
+                return Ok(model);
             }else{
                 return BadRequest(ModelState);
             }

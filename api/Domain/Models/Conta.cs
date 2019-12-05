@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace api.Domain.Models
 {
-    public class Conta:Iconta
+    public class Conta:IConta
     {
         [Key]
         [Range(1, int.MaxValue, ErrorMessage = "Número de conta inválido")]
@@ -12,6 +12,7 @@ namespace api.Domain.Models
         [MaxLength(50, ErrorMessage = "Deve conter no máximo 50 caracteres")]
         public string Cliente { get; set; }
 
+        [Required(ErrorMessage = "Campo Saldo é obrigatório")]
         [Range(0.01,9999999999.9, ErrorMessage = "Saldo deve ser positivo")]
         public decimal Saldo {get; set; }
 
@@ -22,7 +23,7 @@ namespace api.Domain.Models
                 throw new System.Exception("Valor inválido");
             }
 
-            Saldo += valor;
+            this.Saldo += valor;
         }
 
         public void Debitar(decimal valor)
@@ -37,7 +38,7 @@ namespace api.Domain.Models
                 throw new System.Exception("Saldo insuficiente");
             }
 
-            Saldo -= valor;
+            this.Saldo -= valor;
         }
     }
 }

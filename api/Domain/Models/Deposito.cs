@@ -10,12 +10,14 @@ namespace api.Domain.Models
         private const string descDep = "Depósito";
         private const string tipoDep = "DEP";
 
-        public Deposito(IConta conta,
+        public Deposito(
+            IConta conta,
             DateTime data,
             decimal saldoAnterior,
             decimal saldoPosterior,
             decimal valor
-        ) : base (conta,
+        ) : base (
+            conta,
             descDep,
             tipoDep,
             data,
@@ -25,13 +27,14 @@ namespace api.Domain.Models
         )
         {}
 
-        public ITransacao Taxa { get; private set; }
+        public ITransacao Taxa { get; set; }
 
         public ITransacao calculaTaxa()
         {
             var valorTaxa = taxaDep * this.Valor;
             this.Conta.Debitar(valorTaxa);
-            this.Taxa = new Transacao(this.Conta, 
+            this.Taxa = new Transacao(
+                this.Conta, 
                 descTaxaDep, 
                 tipoTaxaDep, 
                 this.Data, 
