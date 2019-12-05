@@ -6,6 +6,7 @@ using api.Controllers;
 using api.Domain.Models;
 using api.Domain.Services;
 using api.Domain.Repositories;
+using api.Domain.Exceptions;
 using api.Domain.DTOs;
 using api.Data;
 using Xunit;
@@ -15,6 +16,29 @@ namespace api_test.Domain.Services
 {
     public class ContaServiceTest
     {
+        [Fact]
+        public async Task CriaContaCorreto()
+        {
+            var repoMock = new Mock<IContaRepository>();  
+            repoMock.Setup(x => x.FindByNumAsync(1)).Returns(Task.FromResult((IConta) null));
+
+            var service = new ContaService(repoMock.Object);  
+            IConta conta = new Conta( 1, "joao", 10m);
+            await service.SaveAsync(conta);
+        }
+
+        [Fact]
+        public void NumeroDeContaExistenteAoCriar()
+        {
+            var repoMock = new Mock<IContaRepository>();    
+            IConta conta = new Conta( 1, "joao", 10m);
+            repoMock.Setup(x => x.FindByNumAsync(1)).Returns(Task.FromResult(conta));
+
+            var service = new ContaService(repoMock.Object);
+
+            Assert.ThrowsAsync<NumeroDeContaExistenteException>(async () => await service.SaveAsync(conta));
+        }
+
         [Theory]
         [InlineData(55,60,5,1)]
         [InlineData(14,110,96,92)]
@@ -44,7 +68,7 @@ namespace api_test.Domain.Services
             var service = new ContaService(repoMock.Object);
             var transrequest = new TransacaoRequest{NumConta = 1, Valor = 10};
 
-            Assert.ThrowsAsync<System.Exception>(async () => await service.SacarAsync(transrequest));
+            Assert.ThrowsAsync<ContaNaoEncontradaException>(async () => await service.SacarAsync(transrequest));
         }
 
         [Fact]
@@ -57,7 +81,7 @@ namespace api_test.Domain.Services
             var service = new ContaService(repoMock.Object);
             var transrequest = new TransacaoRequest{NumConta = 1, Valor = 10};
 
-            Assert.ThrowsAsync<System.Exception>(async () => await service.SacarAsync(transrequest));
+            Assert.ThrowsAsync<SaldoInsuficienteException>(async () => await service.SacarAsync(transrequest));
         }
 
         [Theory]
@@ -89,7 +113,7 @@ namespace api_test.Domain.Services
             var service = new ContaService(repoMock.Object);
             var transrequest = new TransacaoRequest{NumConta = 1, Valor = 10};
 
-            Assert.ThrowsAsync<System.Exception>(async () => await service.DepositarAsync(transrequest));
+            Assert.ThrowsAsync<ContaNaoEncontradaException>(async () => await service.DepositarAsync(transrequest));
         }
     }
 }

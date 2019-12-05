@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using api.Domain.Models;
 using api.Domain.Repositories;
 using api.Domain.DTOs;
+using api.Domain.Exceptions;
 
 namespace api.Domain.Services
 {
@@ -21,9 +22,8 @@ namespace api.Domain.Services
         public async Task<IConta> FindByNumAsync(int Num)
         {
             var conta = await _repository.FindByNumAsync(Num);
-            //não lança exception quando não encontra conta
             if (conta == null) 
-                throw new System.Exception("Conta  não encontrada");
+                throw new ContaNaoEncontradaException("Conta  não encontrada");
 
             return conta;
         }
@@ -35,6 +35,8 @@ namespace api.Domain.Services
 
         public async Task SaveAsync(IConta conta)
         {
+            if(await _repository.FindByNumAsync(conta.Numero) != null)
+                throw new NumeroDeContaExistenteException("Número de conta existente");
             await _repository.SaveAsync(conta);
         }
 

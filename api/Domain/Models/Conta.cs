@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using api.Domain.Exceptions;
 
 namespace api.Domain.Models
 {
@@ -27,24 +28,14 @@ namespace api.Domain.Models
 
         public void Creditar(decimal valor)
         {
-            if (valor < 0.01m)
-            {
-                throw new System.Exception("Valor inválido");
-            }
-
             this.Saldo += valor;
         }
 
         public void Debitar(decimal valor)
         {
-            if (valor < 0.01m)
-            {
-                throw new System.Exception("Valor inválido");
-            }
-
             if (valor > Saldo)
             {
-                throw new System.Exception("Saldo insuficiente");
+                throw new SaldoInsuficienteException("Saldo insuficiente");
             }
 
             this.Saldo -= valor;
