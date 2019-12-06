@@ -15,7 +15,7 @@ using api.Domain.Services;
 using api.Domain.Repositories;
 using api.Data;
 
-namespace chellengeStone
+namespace api
 {
     public class Startup
     {

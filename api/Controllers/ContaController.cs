@@ -86,7 +86,11 @@ namespace api.Controllers
         )
         {
             if (ModelState.IsValid)
-            {                
+            {
+                if(num!=model.NumConta)                
+                {
+                    return BadRequest("Operacao Invalida");
+                }
                 try{
                     await service.DepositarAsync(model);
                 }catch(ContaNaoEncontradaException e)
@@ -111,6 +115,10 @@ namespace api.Controllers
         {
             if (ModelState.IsValid)
             {
+                if(num!=model.NumConta)                
+                {
+                    return BadRequest("Operacao Invalida");
+                }
                 try{
                     await service.SacarAsync(model);
                 }catch(ContaNaoEncontradaException e)

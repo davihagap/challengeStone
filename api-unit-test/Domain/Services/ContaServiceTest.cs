@@ -12,7 +12,7 @@ using api.Data;
 using Xunit;
 using Moq;
 
-namespace api_test.Domain.Services
+namespace api.UnitTests.Domain.Services
 {
     public class ContaServiceTest
     {

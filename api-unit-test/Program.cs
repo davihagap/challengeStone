@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace api_test
+namespace api.UnitTests
 {
     class Program
     {
