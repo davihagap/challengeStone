@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using api.Data;
 using api.Domain.Models;
 using api.Domain.Services;
+using api.Domain.Exceptions;
 using api.Domain.DTOs;
 
 namespace api.Controllers
@@ -16,7 +17,7 @@ namespace api.Controllers
     public class ContaController:ControllerBase
     {
         //get para obtenção de lista de todas as contas do banco
-        //localhost:5000/contas
+        //localhost:5000/api/contas
         [HttpGet]
         [Route("")]
         public async Task<ActionResult<List<Conta>>> Get([FromServices] IContaService service)
@@ -26,28 +27,38 @@ namespace api.Controllers
         }
 
         //get para obtenção de uma conta especifica por número da conta
-        //localhost:5000/contas/1
+        //localhost:5000/api/contas/1
         [HttpGet]
         [Route("{num:int}")]
         public async Task<ActionResult<Conta>> GetByNum([FromServices] IContaService service, int num)
         {
-            var result = await service.FindByNumAsync(num);
-            return Ok(result);
+            try{
+                var result = await service.FindByNumAsync(num);
+                return Ok(result);
+            }catch(ContaNaoEncontradaException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         //get para obtenção do extrato da conta
-        //localhost:5000/contas/1/extratos
+        //localhost:5000/api/contas/1/extratos
         [HttpGet]
         [Route("{num:int}/extratos")]
         public async Task<ActionResult<IEnumerable<Transacao>>> GetExtratos([FromServices] IContaService service, int num)
         {
-            var result =  await service.ListTransacoesAsync(num);
-            return Ok(result);
+            try{
+                var result = await service.ListTransacoesAsync(num);
+                return Ok(result);
+            }catch(ContaNaoEncontradaException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
 
         //Post para criação de conta
-        //localhost:5000/contas
+        //localhost:5000/api/contas
         [HttpPost]
         [Route("")]
         public async Task<ActionResult<Conta>> PostCriaConta(
@@ -58,14 +69,14 @@ namespace api.Controllers
             if (ModelState.IsValid)
             {                
                 await service.SaveAsync(model);
-                return Ok(model);
+                return Created($"api/contas/{model.Numero}", model);
             }else{
                 return BadRequest(ModelState);
             }
         }
 
         //post para realização de depósito em conta
-        //localhost:5000/contas/3356/depositos/
+        //localhost:5000/api/contas/3356/depositos/
         [HttpPost]
         [Route("{num:int}/depositos")]
         public async Task<ActionResult<TransacaoRequest>> PostDeposito(
@@ -75,16 +86,21 @@ namespace api.Controllers
         )
         {
             if (ModelState.IsValid)
-            {
-                await service.DepositarAsync(model);
-                return Ok(model);
+            {                
+                try{
+                    await service.DepositarAsync(model);
+                }catch(ContaNaoEncontradaException e)
+                {
+                    return NotFound(e.Message);
+                }
+                return Created($"api/contas/{num}/extratos", model);
             }else{
                 return BadRequest(ModelState);
             }
         }
 
         //post para realização de saque em conta
-        //localhost:5000/contas/3356/saques/
+        //localhost:5000/api/contas/3356/saques/
         [HttpPost]
         [Route("{num:int}/saques")]
         public async Task<ActionResult<TransacaoRequest>> PostSaque(
@@ -95,8 +111,17 @@ namespace api.Controllers
         {
             if (ModelState.IsValid)
             {
-                await service.SacarAsync(model);
-                return Ok(model);
+                try{
+                    await service.SacarAsync(model);
+                }catch(ContaNaoEncontradaException e)
+                {
+                    return NotFound(e.Message);
+                }catch(SaldoInsuficienteException e)
+                {
+                    return Unauthorized(e.Message);
+                }
+                
+                return Created($"api/contas/{num}/extratos", model);
             }else{
                 return BadRequest(ModelState);
             }

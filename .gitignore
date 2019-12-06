@@ -1,4 +1,4 @@
 api/bin
 api/obj
-api-test/bin
-api-test/obj
+api-unit-test/bin
+api-unit-test/obj

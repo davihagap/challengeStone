@@ -31,7 +31,7 @@ namespace api.Domain.Models
 
         public ITransacao calculaTaxa()
         {
-            var valorTaxa = taxaDep * this.Valor;
+            var valorTaxa = Decimal.Round(taxaDep * this.Valor, 2);
             this.Conta.Debitar(valorTaxa);
             this.Taxa = new Transacao(
                 this.Conta, 

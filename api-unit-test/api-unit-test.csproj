@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <RootNamespace>api_test</RootNamespace>
+    <RootNamespace>api_unit_test</RootNamespace>
     <GenerateProgramFile>false</GenerateProgramFile>
   </PropertyGroup>
 
