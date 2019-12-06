@@ -15,7 +15,7 @@ Depois de instalar o sdk pra rodar a api entre na pasta do projeto principal (".
 dotnet build & dotnet run
 ```
 
-Para rodar os testes vá para "..\challengeStone\api-test" e execute:
+Para rodar os testes vá para "..\challengeStone\api-integration-test" ou "..\challengeStone\api-unit-test" e execute:
 
 ```sh
 dotnet build & dotnet test
